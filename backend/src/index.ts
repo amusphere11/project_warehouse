@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -50,9 +50,33 @@ app.use(morgan('combined', { stream: { write: (message) => logger.info(message.t
 // API Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// Root Route
+app.get('/', (_req, res) => {
+  res.json({
+    message: 'Production & Inventory Management System API',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      health: '/health',
+      documentation: '/api-docs',
+      auth: '/api/auth',
+      materials: '/api/materials',
+      products: '/api/products',
+      inventory: '/api/inventory',
+      reports: '/api/reports',
+      dashboard: '/api/dashboard',
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Health Check
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+app.get('/health', (_req, res) => {
+  res.json({ 
+    status: 'OK', 
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString() 
+  });
 });
 
 // Routes
