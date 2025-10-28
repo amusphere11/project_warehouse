@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import { logger } from './utils/logger';
+import { logger } from '../utils/logger';
 
 export const initWebSocket = (io: Server) => {
   io.on('connection', (socket) => {

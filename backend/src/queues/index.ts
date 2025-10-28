@@ -1,7 +1,7 @@
 import Queue from 'bull';
-import redis from './config/redis';
-import { logger } from './utils/logger';
-import prisma from './config/database';
+import redis from '../config/redis';
+import { logger } from '../utils/logger';
+import prisma from '../config/database';
 
 // Create queues
 export const scanQueue = new Queue('barcode-scan', {

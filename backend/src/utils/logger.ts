@@ -35,3 +35,6 @@ export const stream = {
     logger.info(message.trim());
   },
 };
+
+// Default export
+export default logger;
