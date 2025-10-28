@@ -1,0 +1,207 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// MASTER DATA
+// ============================================
+
+model Material {
+  id          String   @id @default(uuid())
+  barcode     String   @unique
+  name        String
+  description String?
+  unit        String   // kg, pcs, box, etc
+  minStock    Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  transactions InventoryTransaction[]
+  stockSummary StockSummary?
+
+  @@index([barcode])
+  @@map("materials")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  barcode     String   @unique
+  name        String
+  description String?
+  unit        String   // kg, pcs, box, etc
+  minStock    Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  transactions InventoryTransaction[]
+  stockSummary StockSummary?
+
+  @@index([barcode])
+  @@map("products")
+}
+
+// ============================================
+// INVENTORY TRANSACTIONS
+// ============================================
+
+enum TransactionType {
+  INBOUND  // Barang Masuk
+  OUTBOUND // Barang Keluar
+  ADJUSTMENT // Penyesuaian/Koreksi
+}
+
+enum ItemType {
+  MATERIAL
+  PRODUCT
+}
+
+model InventoryTransaction {
+  id            String          @id @default(uuid())
+  transactionNo String          @unique // Auto-generated: INB-20240101-001, OUT-20240101-001
+  type          TransactionType
+  itemType      ItemType
+  
+  // Relations
+  materialId    String?
+  material      Material?       @relation(fields: [materialId], references: [id])
+  productId     String?
+  product       Product?        @relation(fields: [productId], references: [id])
+  
+  // Barcode yang di-scan
+  barcode       String
+  
+  // Quantity & Weight
+  quantity      Float
+  unit          String
+  initialWeight Float?          // Berat awal saat masuk
+  currentWeight Float?          // Berat setelah ditimbang ulang
+  shrinkage     Float?          // Penyusutan (initialWeight - currentWeight)
+  
+  // Additional Info
+  referenceNo   String?         // PO/DO/Invoice Number
+  supplier      String?         // Untuk inbound
+  destination   String?         // Untuk outbound
+  notes         String?
+  
+  // Timestamps
+  transactionDate DateTime      @default(now())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  
+  // User who performed the transaction
+  userId        String?
+  user          User?           @relation(fields: [userId], references: [id])
+  
+  weighingRecords WeighingRecord[]
+
+  @@index([barcode])
+  @@index([transactionNo])
+  @@index([transactionDate])
+  @@index([type])
+  @@index([materialId])
+  @@index([productId])
+  @@map("inventory_transactions")
+}
+
+// ============================================
+// WEIGHING RECORDS (untuk tracking re-weighing)
+// ============================================
+
+model WeighingRecord {
+  id            String              @id @default(uuid())
+  transactionId String
+  transaction   InventoryTransaction @relation(fields: [transactionId], references: [id])
+  
+  weight        Float
+  weighedAt     DateTime            @default(now())
+  weighedBy     String?
+  notes         String?
+  
+  createdAt     DateTime            @default(now())
+
+  @@index([transactionId])
+  @@map("weighing_records")
+}
+
+// ============================================
+// STOCK SUMMARY (Real-time stock levels)
+// ============================================
+
+model StockSummary {
+  id         String   @id @default(uuid())
+  
+  // Relations
+  materialId String?  @unique
+  material   Material? @relation(fields: [materialId], references: [id])
+  productId  String?  @unique
+  product    Product? @relation(fields: [productId], references: [id])
+  
+  barcode    String   @unique
+  currentStock Float   @default(0)
+  unit       String
+  
+  lastInbound  DateTime?
+  lastOutbound DateTime?
+  updatedAt    DateTime @updatedAt
+
+  @@index([barcode])
+  @@map("stock_summary")
+}
+
+// ============================================
+// USERS & AUTHENTICATION
+// ============================================
+
+enum UserRole {
+  ADMIN
+  WAREHOUSE_MANAGER
+  OPERATOR
+  VIEWER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(OPERATOR)
+  isActive  Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  transactions InventoryTransaction[]
+
+  @@index([email])
+  @@map("users")
+}
+
+// ============================================
+// SYSTEM LOGS (Optional - untuk audit trail)
+// ============================================
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String   // CREATE, UPDATE, DELETE, etc
+  entity    String   // Transaction, Material, Product, etc
+  entityId  String
+  oldValue  Json?
+  newValue  Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

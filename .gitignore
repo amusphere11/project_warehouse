@@ -1,0 +1,74 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+*.lcov
+
+# Logs
+logs/
+*.log
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Prisma
+prisma/migrations/
+
+# Docker
+*.tar.gz
+
+# Backups
+backups/
+*.dump
+*.dump.gz
+*.rdb
+*.rdb.gz
+
+# Nginx logs
+nginx/logs/
+nginx/ssl/*.pem
+
+# Production env
+.env.prod
+
+# Docker
+docker-compose.override.yml
+
+# Reports output
+reports/
+exports/
+temp/
