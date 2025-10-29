@@ -2,6 +2,71 @@
 
 Sistema manajemen produksi dan inventori dengan kemampuan scanning barcode, tracking real-time, dan reporting untuk warehouse yang memproses **4000+ boxes per hari**.
 
+## 🚀 Quick Start
+
+### Automatic Setup (Recommended)
+
+```bash
+# Clone repository
+git clone <your-repo-url>
+cd project_warehouse
+
+# Run automatic setup
+./quick-setup.sh
+
+# Start development
+npm run dev
+```
+
+**Login dengan:**
+- Email: `admin@warehouse.com`
+- Password: `admin123`
+
+**Akses:**
+- Frontend: http://localhost:5173
+- Backend: http://localhost:3000
+- API Docs: http://localhost:3000/api-docs
+
+### Manual Setup
+
+```bash
+# 1. Setup database
+sudo -u postgres psql
+CREATE DATABASE warehouse_db;
+CREATE USER warehouse_user WITH PASSWORD 'warehouse_pass';
+GRANT ALL PRIVILEGES ON DATABASE warehouse_db TO warehouse_user;
+\q
+
+# 2. Setup backend
+cd backend
+cp .env.example .env
+npm install
+npx prisma generate
+npx prisma migrate dev
+npx prisma db seed  # ← PENTING!
+
+# 3. Setup frontend
+cd ../frontend
+cp .env.example .env
+npm install
+
+# 4. Start development
+cd ..
+npm run dev
+```
+
+### 🔧 Login Gagal?
+
+**Solusi tercepat:**
+```bash
+cd backend
+npx prisma db seed
+```
+
+📖 **Baca:** [LOGIN_FAILED_FIX.md](./LOGIN_FAILED_FIX.md) untuk troubleshooting lengkap.
+
+---
+
 > **📖 Baca dokumentasi lengkap:**
 > - 🇮🇩 **[RINGKASAN LENGKAP (Bahasa Indonesia)](./docs/RINGKASAN_LENGKAP.md)** ← Baca ini dulu!
 > - 🏗️ [Architecture & Tech Stack](./docs/ARCHITECTURE.md)
