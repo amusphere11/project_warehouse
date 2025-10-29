@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Paper,
@@ -9,12 +9,48 @@ import {
   MenuItem,
   Grid,
 } from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridValueGetterParams, GridRenderCellParams } from '@mui/x-data-grid';
 import { FileDownload } from '@mui/icons-material';
 import api from '../services/api';
 
+// Types
+interface InventoryTransaction {
+  id: string;
+  transactionNo: string;
+  transactionDate: string;
+  type: 'INBOUND' | 'OUTBOUND' | 'ADJUSTMENT';
+  itemType: 'MATERIAL' | 'PRODUCT';
+  barcode: string;
+  quantity: number;
+  unit: string;
+  initialWeight?: number;
+  currentWeight?: number;
+  shrinkage?: number;
+  referenceNo?: string;
+  supplier?: string;
+  destination?: string;
+  notes?: string;
+  material?: {
+    id: string;
+    name: string;
+    barcode: string;
+    unit: string;
+  };
+  product?: {
+    id: string;
+    name: string;
+    barcode: string;
+    unit: string;
+  };
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
+
 export default function Inventory() {
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState<InventoryTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -37,8 +73,28 @@ export default function Inventory() {
       if (filterBarcode) params.barcode = filterBarcode;
 
       const response = await api.get('/api/inventory/transactions', { params });
-      setTransactions(response.data.data);
-      setTotal(response.data.pagination.total);
+      
+      // Debug logging
+      console.log('=== INVENTORY API DEBUG ===');
+      console.log('Full API Response:', response.data);
+      console.log('Transactions count:', response.data.data?.length);
+      
+      if (response.data.data && response.data.data.length > 0) {
+        const firstTx = response.data.data[0];
+        console.log('First Transaction Sample:', firstTx);
+        console.log('- transactionNo:', firstTx.transactionNo, typeof firstTx.transactionNo);
+        console.log('- transactionDate:', firstTx.transactionDate, typeof firstTx.transactionDate);
+        console.log('- quantity:', firstTx.quantity, typeof firstTx.quantity);
+        console.log('- unit:', firstTx.unit, typeof firstTx.unit);
+        console.log('- initialWeight:', firstTx.initialWeight, typeof firstTx.initialWeight);
+        console.log('- shrinkage:', firstTx.shrinkage, typeof firstTx.shrinkage);
+        console.log('- material:', firstTx.material);
+        console.log('- product:', firstTx.product);
+      }
+      console.log('=========================');
+      
+      setTransactions(response.data.data || []);
+      setTotal(response.data.pagination?.total || 0);
     } catch (error) {
       console.error('Error fetching transactions:', error);
     } finally {
@@ -51,7 +107,7 @@ export default function Inventory() {
     fetchTransactions();
   };
 
-  const columns: GridColDef[] = [
+  const columns: GridColDef<InventoryTransaction>[] = [
     {
       field: 'transactionNo',
       headerName: 'Transaction No',
@@ -61,7 +117,7 @@ export default function Inventory() {
       field: 'transactionDate',
       headerName: 'Date',
       width: 180,
-      valueGetter: (value) => {
+      valueGetter: (value: any) => {
         if (!value) return '-';
         try {
           return new Date(value).toLocaleString('id-ID', {
@@ -80,7 +136,7 @@ export default function Inventory() {
       field: 'type',
       headerName: 'Type',
       width: 120,
-      renderCell: (params) => (
+      renderCell: (params: any) => (
         <Chip
           label={params.value}
           color={params.value === 'INBOUND' ? 'success' : 'error'}
@@ -97,7 +153,7 @@ export default function Inventory() {
       field: 'itemName',
       headerName: 'Item',
       width: 200,
-      valueGetter: (value, row) => {
+      valueGetter: (_value: any, row: InventoryTransaction) => {
         return row?.material?.name || row?.product?.name || row?.barcode || '-';
       },
     },
@@ -105,7 +161,7 @@ export default function Inventory() {
       field: 'quantity',
       headerName: 'Quantity',
       width: 120,
-      valueGetter: (value, row) => {
+      valueGetter: (value: any, row: InventoryTransaction) => {
         const qty = value || 0;
         const unit = row?.unit || '';
         return `${qty} ${unit}`.trim();
@@ -115,7 +171,7 @@ export default function Inventory() {
       field: 'initialWeight',
       headerName: 'Weight (kg)',
       width: 120,
-      valueGetter: (value) => {
+      valueGetter: (value: any) => {
         return value ? `${value} kg` : '-';
       },
     },
@@ -123,7 +179,7 @@ export default function Inventory() {
       field: 'shrinkage',
       headerName: 'Shrinkage',
       width: 120,
-      valueGetter: (value) => {
+      valueGetter: (value: any) => {
         if (value == null || value === '') return '-';
         const num = typeof value === 'number' ? value : parseFloat(value);
         return isNaN(num) ? '-' : `${num.toFixed(2)} kg`;
@@ -133,7 +189,7 @@ export default function Inventory() {
       field: 'supplier',
       headerName: 'Supplier/Dest',
       width: 150,
-      valueGetter: (value, row) => {
+      valueGetter: (_value: any, row: InventoryTransaction) => {
         return row?.supplier || row?.destination || '-';
       },
     },
@@ -160,7 +216,7 @@ export default function Inventory() {
               label="Filter Type"
               fullWidth
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilterType(e.target.value)}
             >
               <MenuItem value="">All</MenuItem>
               <MenuItem value="INBOUND">Inbound</MenuItem>
@@ -172,8 +228,8 @@ export default function Inventory() {
               label="Search Barcode"
               fullWidth
               value={filterBarcode}
-              onChange={(e) => setFilterBarcode(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFilterBarcode(e.target.value)}
+              onKeyPress={(e: React.KeyboardEvent) => e.key === 'Enter' && handleSearch()}
             />
           </Grid>
           <Grid item xs={12} sm={4}>
