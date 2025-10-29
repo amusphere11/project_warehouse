@@ -29,7 +29,8 @@ export const getDashboardStats = async (
       totalOutbound,
       totalMaterials,
       totalProducts,
-      lowStockCount,
+      lowStockMaterials,
+      lowStockProducts,
     ] = await Promise.all([
       prisma.inventoryTransaction.count({
         where: {
@@ -45,29 +46,53 @@ export const getDashboardStats = async (
       }),
       prisma.material.count(),
       prisma.product.count(),
+      // Count materials with low stock
       prisma.stockSummary.count({
         where: {
-          OR: [
-            {
-              material: {
-                minStock: { gt: 0 },
-              },
-              currentStock: {
-                lte: prisma.material.fields.minStock,
-              },
-            },
-            {
-              product: {
-                minStock: { gt: 0 },
-              },
-              currentStock: {
-                lte: prisma.product.fields.minStock,
-              },
-            },
-          ],
+          materialId: { not: null },
+          material: {
+            minStock: { gt: 0 },
+          },
         },
+      }).then(async (total) => {
+        // Get actual low stock count by comparing with material minStock
+        const lowStocks = await prisma.stockSummary.findMany({
+          where: {
+            materialId: { not: null },
+          },
+          include: {
+            material: {
+              select: { minStock: true },
+            },
+          },
+        });
+        return lowStocks.filter(s => s.material && s.currentStock <= s.material.minStock).length;
+      }),
+      // Count products with low stock
+      prisma.stockSummary.count({
+        where: {
+          productId: { not: null },
+          product: {
+            minStock: { gt: 0 },
+          },
+        },
+      }).then(async (total) => {
+        // Get actual low stock count by comparing with product minStock
+        const lowStocks = await prisma.stockSummary.findMany({
+          where: {
+            productId: { not: null },
+          },
+          include: {
+            product: {
+              select: { minStock: true },
+            },
+          },
+        });
+        return lowStocks.filter(s => s.product && s.currentStock <= s.product.minStock).length;
       }),
     ]);
+
+    const lowStockCount = lowStockMaterials + lowStockProducts;
 
     const stats = {
       totalInbound,
