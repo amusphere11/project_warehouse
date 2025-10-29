@@ -84,13 +84,13 @@ export default function Inventory() {
       field: 'itemName',
       headerName: 'Item',
       width: 200,
-      valueGetter: (params, row) => row.material?.name || row.product?.name || '-',
+      valueGetter: (params, row) => row?.material?.name || row?.product?.name || row?.barcode || '-',
     },
     {
       field: 'quantity',
       headerName: 'Quantity',
       width: 120,
-      valueFormatter: (params, row) => `${params} ${row.unit}`,
+      valueFormatter: (params, row) => `${params || 0} ${row?.unit || ''}`,
     },
     {
       field: 'initialWeight',
@@ -102,13 +102,17 @@ export default function Inventory() {
       field: 'shrinkage',
       headerName: 'Shrinkage',
       width: 120,
-      valueFormatter: (params) => params ? `${params.toFixed(2)} kg` : '-',
+      valueFormatter: (params) => {
+        if (params == null || params === '') return '-';
+        const num = typeof params === 'number' ? params : parseFloat(params);
+        return isNaN(num) ? '-' : `${num.toFixed(2)} kg`;
+      },
     },
     {
       field: 'supplier',
       headerName: 'Supplier/Dest',
       width: 150,
-      valueGetter: (params, row) => row.supplier || row.destination || '-',
+      valueGetter: (params, row) => row?.supplier || row?.destination || '-',
     },
   ];
 
