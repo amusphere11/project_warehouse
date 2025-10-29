@@ -40,6 +40,12 @@ coverage/
 logs/
 *.log
 
+# Process IDs
+*.pid
+
+# PM2
+.pm2/
+
 # Database
 *.sqlite
 *.sqlite3
