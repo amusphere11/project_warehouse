@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2025-10-29
+
+### 🐛 Bug Fixes - Inventory Page
+
+#### Fixed Data Display Issues
+- 🔧 **Date Column** - Fixed "Invalid Date" → now shows "DD/MM/YYYY, HH:MM"
+- 🔧 **Item Column** - Fixed "[object Object]" → now shows Material/Product name
+- 🔧 **Quantity Column** - Fixed "[object Object]" → now shows "100 kg" format
+- 🔧 **Weight Column** - Fixed "[object Object] kg" → now shows "50 kg"
+- 🔧 **Supplier Column** - Fixed "[object Object]" → now shows supplier name
+
+#### Technical Changes
+- ✅ Updated DataGrid columns to MUI v6 valueGetter signature
+- ✅ Changed from `valueFormatter` to `valueGetter` (v6 best practice)
+- ✅ Added proper error handling for null/undefined values
+- ✅ Improved date formatting with locale support (id-ID)
+- ✅ Added fallback values ('-') for missing data
+
+#### Files Modified
+- `frontend/src/pages/Inventory.tsx` - Fixed all column definitions
+
+#### Documentation
+- 📄 Added `INVENTORY_DISPLAY_FIX.md` - Quick fix reference
+
+---
+
 ## [1.1.0] - 2025-10-29
 
 ### 🎨 UI/UX Major Upgrade - Modern Material Design + Material Dashboard Integration

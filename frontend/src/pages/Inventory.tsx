@@ -61,7 +61,20 @@ export default function Inventory() {
       field: 'transactionDate',
       headerName: 'Date',
       width: 180,
-      valueFormatter: (params) => new Date(params).toLocaleString(),
+      valueGetter: (value) => {
+        if (!value) return '-';
+        try {
+          return new Date(value).toLocaleString('id-ID', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+        } catch {
+          return '-';
+        }
+      },
     },
     {
       field: 'type',
@@ -84,27 +97,35 @@ export default function Inventory() {
       field: 'itemName',
       headerName: 'Item',
       width: 200,
-      valueGetter: (params, row) => row?.material?.name || row?.product?.name || row?.barcode || '-',
+      valueGetter: (value, row) => {
+        return row?.material?.name || row?.product?.name || row?.barcode || '-';
+      },
     },
     {
       field: 'quantity',
       headerName: 'Quantity',
       width: 120,
-      valueFormatter: (params, row) => `${params || 0} ${row?.unit || ''}`,
+      valueGetter: (value, row) => {
+        const qty = value || 0;
+        const unit = row?.unit || '';
+        return `${qty} ${unit}`.trim();
+      },
     },
     {
       field: 'initialWeight',
       headerName: 'Weight (kg)',
       width: 120,
-      valueFormatter: (params) => params ? `${params} kg` : '-',
+      valueGetter: (value) => {
+        return value ? `${value} kg` : '-';
+      },
     },
     {
       field: 'shrinkage',
       headerName: 'Shrinkage',
       width: 120,
-      valueFormatter: (params) => {
-        if (params == null || params === '') return '-';
-        const num = typeof params === 'number' ? params : parseFloat(params);
+      valueGetter: (value) => {
+        if (value == null || value === '') return '-';
+        const num = typeof value === 'number' ? value : parseFloat(value);
         return isNaN(num) ? '-' : `${num.toFixed(2)} kg`;
       },
     },
@@ -112,7 +133,9 @@ export default function Inventory() {
       field: 'supplier',
       headerName: 'Supplier/Dest',
       width: 150,
-      valueGetter: (params, row) => row?.supplier || row?.destination || '-',
+      valueGetter: (value, row) => {
+        return row?.supplier || row?.destination || '-';
+      },
     },
   ];
 
