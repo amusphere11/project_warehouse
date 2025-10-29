@@ -12,6 +12,7 @@ import { logger } from './utils/logger';
 
 // Routes
 import authRoutes from './routes/auth.routes';
+import userRoutes from './routes/user.routes';
 import materialRoutes from './routes/material.routes';
 import productRoutes from './routes/product.routes';
 import inventoryRoutes from './routes/inventory.routes';
@@ -75,6 +76,7 @@ app.get('/', (_req, res) => {
       health: '/health',
       documentation: '/api-docs',
       auth: '/api/auth',
+      users: '/api/users',
       materials: '/api/materials',
       products: '/api/products',
       inventory: '/api/inventory',
@@ -96,6 +98,7 @@ app.get('/health', (_req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/materials', materialRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/inventory', inventoryRoutes);

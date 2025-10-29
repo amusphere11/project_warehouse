@@ -30,19 +30,28 @@ import {
   Logout,
   Brightness4,
   Brightness7,
+  People,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 
 const drawerWidth = 280;
 
-const menuItems = [
+interface MenuItem {
+  text: string;
+  icon: React.ReactNode;
+  path: string;
+  adminOnly?: boolean;
+}
+
+const menuItems: MenuItem[] = [
   { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
   { text: 'Scanning', icon: <QrCodeScanner />, path: '/scanning' },
   { text: 'Inventory', icon: <Inventory />, path: '/inventory' },
   { text: 'Materials', icon: <Category />, path: '/materials' },
   { text: 'Products', icon: <ShoppingCart />, path: '/products' },
   { text: 'Reports', icon: <Assessment />, path: '/reports' },
+  { text: 'Users', icon: <People />, path: '/users', adminOnly: true },
 ];
 
 interface LayoutProps {
@@ -106,7 +115,9 @@ export default function Layout({ children, mode, toggleTheme }: LayoutProps) {
       </Box>
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
       <List sx={{ flexGrow: 1, px: 2, py: 2 }}>
-        {menuItems.map((item) => {
+        {menuItems
+          .filter((item) => !item.adminOnly || user?.role === 'ADMIN')
+          .map((item) => {
           const isSelected = location.pathname === item.path;
           return (
             <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
