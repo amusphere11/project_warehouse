@@ -6,6 +6,20 @@ Jika Anda menjalankan `npm run dev` tapi login gagal, **hampir 100% karena datab
 
 ---
 
+## ⚠️ Error Saat Seed?
+
+**Jika ada error "Unique constraint failed on transactionNo":**
+
+```bash
+# Reset database (hapus semua data & seed ulang)
+cd backend
+npx prisma migrate reset --force
+
+# Atau baca: SEED_ERROR_FIX.md
+```
+
+---
+
 ## ✅ Solusi Cepat (5 Menit)
 
 ### Opsi 1: Automatic Setup (Recommended)

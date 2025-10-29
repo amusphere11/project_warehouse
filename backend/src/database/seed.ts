@@ -118,13 +118,15 @@ async function main() {
 
   console.log('✅ Stock summary created');
 
-  // Create sample transactions
+  // Create sample transactions (using upsert to avoid duplicates)
   const material1 = await prisma.material.findUnique({ where: { barcode: 'MAT-001' } });
   const product1 = await prisma.product.findUnique({ where: { barcode: 'PRD-001' } });
 
   if (material1) {
-    await prisma.inventoryTransaction.create({
-      data: {
+    await prisma.inventoryTransaction.upsert({
+      where: { transactionNo: 'INB-20240101-0001' },
+      update: {},
+      create: {
         transactionNo: 'INB-20240101-0001',
         type: 'INBOUND',
         itemType: 'MATERIAL',
@@ -142,8 +144,10 @@ async function main() {
   }
 
   if (product1) {
-    await prisma.inventoryTransaction.create({
-      data: {
+    await prisma.inventoryTransaction.upsert({
+      where: { transactionNo: 'OUT-20240101-0001' },
+      update: {},
+      create: {
         transactionNo: 'OUT-20240101-0001',
         type: 'OUTBOUND',
         itemType: 'PRODUCT',
