@@ -257,8 +257,14 @@ export default function Users() {
       field: 'createdAt',
       headerName: 'Created',
       width: 150,
-      valueFormatter: (params: any) => {
-        return new Date(params).toLocaleDateString();
+      renderCell: (params: GridRenderCellParams) => {
+        if (!params.value) return '-';
+        const date = new Date(params.value);
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        });
       },
     },
     {
