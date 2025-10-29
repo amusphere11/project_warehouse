@@ -107,7 +107,7 @@ export default function Inventory() {
     fetchTransactions();
   };
 
-  const columns: GridColDef<InventoryTransaction>[] = [
+  const columns: GridColDef[] = [
     {
       field: 'transactionNo',
       headerName: 'Transaction No',
@@ -117,10 +117,10 @@ export default function Inventory() {
       field: 'transactionDate',
       headerName: 'Date',
       width: 180,
-      valueGetter: (value: any) => {
-        if (!value) return '-';
+      renderCell: (params) => {
+        if (!params.value) return '-';
         try {
-          return new Date(value).toLocaleString('id-ID', {
+          return new Date(params.value).toLocaleString('id-ID', {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',
@@ -136,7 +136,7 @@ export default function Inventory() {
       field: 'type',
       headerName: 'Type',
       width: 120,
-      renderCell: (params: any) => (
+      renderCell: (params) => (
         <Chip
           label={params.value}
           color={params.value === 'INBOUND' ? 'success' : 'error'}
@@ -150,10 +150,11 @@ export default function Inventory() {
       width: 150,
     },
     {
-      field: 'itemName',
+      field: 'material',
       headerName: 'Item',
       width: 200,
-      valueGetter: (_value: any, row: InventoryTransaction) => {
+      renderCell: (params) => {
+        const row = params.row;
         return row?.material?.name || row?.product?.name || row?.barcode || '-';
       },
     },
@@ -161,8 +162,9 @@ export default function Inventory() {
       field: 'quantity',
       headerName: 'Quantity',
       width: 120,
-      valueGetter: (value: any, row: InventoryTransaction) => {
-        const qty = value || 0;
+      renderCell: (params) => {
+        const row = params.row;
+        const qty = params.row.quantity || 0;
         const unit = row?.unit || '';
         return `${qty} ${unit}`.trim();
       },
@@ -171,15 +173,16 @@ export default function Inventory() {
       field: 'initialWeight',
       headerName: 'Weight (kg)',
       width: 120,
-      valueGetter: (value: any) => {
-        return value ? `${value} kg` : '-';
+      renderCell: (params) => {
+        return params.value ? `${params.value} kg` : '-';
       },
     },
     {
       field: 'shrinkage',
       headerName: 'Shrinkage',
       width: 120,
-      valueGetter: (value: any) => {
+      renderCell: (params) => {
+        const value = params.value;
         if (value == null || value === '') return '-';
         const num = typeof value === 'number' ? value : parseFloat(value);
         return isNaN(num) ? '-' : `${num.toFixed(2)} kg`;
@@ -189,7 +192,8 @@ export default function Inventory() {
       field: 'supplier',
       headerName: 'Supplier/Dest',
       width: 150,
-      valueGetter: (_value: any, row: InventoryTransaction) => {
+      renderCell: (params) => {
+        const row = params.row;
         return row?.supplier || row?.destination || '-';
       },
     },
