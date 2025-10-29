@@ -3,6 +3,69 @@ import prisma from '../config/database';
 import redis from '../config/redis';
 import { getDateRange } from '../utils/helpers';
 
+export const getWeeklyChartData = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Get last 7 days
+    const days = 7;
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    
+    const chartData = [];
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+      
+      const nextDate = new Date(date);
+      nextDate.setDate(nextDate.getDate() + 1);
+      
+      const [inboundCount, outboundCount] = await Promise.all([
+        prisma.inventoryTransaction.count({
+          where: {
+            type: 'INBOUND',
+            transactionDate: {
+              gte: date,
+              lt: nextDate,
+            },
+          },
+        }),
+        prisma.inventoryTransaction.count({
+          where: {
+            type: 'OUTBOUND',
+            transactionDate: {
+              gte: date,
+              lt: nextDate,
+            },
+          },
+        }),
+      ]);
+      
+      // Get day name
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const dayName = dayNames[date.getDay()];
+      
+      chartData.push({
+        name: dayName,
+        inbound: inboundCount,
+        outbound: outboundCount,
+        date: date.toISOString().split('T')[0],
+      });
+    }
+    
+    res.json({
+      status: 'success',
+      data: chartData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getDashboardStats = async (
   req: Request,
   res: Response,

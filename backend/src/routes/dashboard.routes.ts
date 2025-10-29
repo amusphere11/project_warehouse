@@ -26,6 +26,20 @@ router.get('/stats', authenticate, dashboardController.getDashboardStats);
 
 /**
  * @swagger
+ * /api/dashboard/weekly-chart:
+ *   get:
+ *     summary: Get weekly transaction chart data
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Weekly chart data for last 7 days
+ */
+router.get('/weekly-chart', authenticate, dashboardController.getWeeklyChartData);
+
+/**
+ * @swagger
  * /api/dashboard/recent-transactions:
  *   get:
  *     summary: Get recent transactions

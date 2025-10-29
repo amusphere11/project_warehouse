@@ -39,21 +39,37 @@ interface Stats {
   lowStockCount: number;
 }
 
+interface ChartData {
+  name: string;
+  inbound: number;
+  outbound: number;
+  date: string;
+}
+
 export default function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const theme = useTheme();
 
   useEffect(() => {
-    fetchStats();
+    fetchDashboardData();
   }, []);
 
-  const fetchStats = async () => {
+  const fetchDashboardData = async () => {
     try {
-      const response = await api.get('/api/dashboard/stats?period=today');
-      setStats(response.data.data);
+      const [statsResponse, chartResponse] = await Promise.all([
+        api.get('/api/dashboard/stats?period=today'),
+        api.get('/api/dashboard/weekly-chart'),
+      ]);
+      
+      console.log('Dashboard Stats:', statsResponse.data.data);
+      console.log('Chart Data:', chartResponse.data.data);
+      
+      setStats(statsResponse.data.data);
+      setChartData(chartResponse.data.data);
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      console.error('Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
     }
@@ -67,15 +83,10 @@ export default function Dashboard() {
     );
   }
 
-  const mockChartData = [
-    { name: 'Mon', inbound: 400, outbound: 240 },
-    { name: 'Tue', inbound: 300, outbound: 139 },
-    { name: 'Wed', inbound: 200, outbound: 980 },
-    { name: 'Thu', inbound: 278, outbound: 390 },
-    { name: 'Fri', inbound: 189, outbound: 480 },
-    { name: 'Sat', inbound: 239, outbound: 380 },
-    { name: 'Sun', inbound: 349, outbound: 430 },
-  ];
+  // Show message if no data
+  if (!chartData || chartData.length === 0) {
+    console.warn('No chart data available');
+  }
 
   const statCards = [
     {
@@ -167,7 +178,7 @@ export default function Dashboard() {
               Transaction comparison for the last 7 days
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={mockChartData}>
+              <BarChart data={chartData}>
                 <CartesianGrid 
                   strokeDasharray="3 3" 
                   stroke={theme.palette.divider}
@@ -224,7 +235,7 @@ export default function Dashboard() {
               Inbound and outbound flow over time
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={mockChartData}>
+              <LineChart data={chartData}>
                 <CartesianGrid 
                   strokeDasharray="3 3" 
                   stroke={theme.palette.divider}
