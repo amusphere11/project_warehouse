@@ -16,6 +16,8 @@ import {
   Menu,
   MenuItem,
   Divider,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -26,11 +28,13 @@ import {
   ShoppingCart,
   Assessment,
   Logout,
+  Brightness4,
+  Brightness7,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 
-const drawerWidth = 240;
+const drawerWidth = 280;
 
 const menuItems = [
   { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
@@ -43,14 +47,17 @@ const menuItems = [
 
 interface LayoutProps {
   children: React.ReactNode;
+  mode: 'light' | 'dark';
+  toggleTheme: () => void;
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, mode, toggleTheme }: LayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
+  const theme = useTheme();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -70,58 +77,147 @@ export default function Layout({ children }: LayoutProps) {
   };
 
   const drawer = (
-    <div>
-      <Toolbar>
-        <Typography variant="h6" noWrap component="div">
-          📦 Warehouse
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        background: theme.palette.mode === 'dark' 
+          ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
+          : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      }}
+    >
+      <Box sx={{ p: 3 }}>
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            fontWeight: 800,
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+          }}
+        >
+          📦 Warehouse Pro
         </Typography>
-      </Toolbar>
-      <Divider />
-      <List>
-        {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              selected={location.pathname === item.path}
-              onClick={() => {
-                navigate(item.path);
-                setMobileOpen(false);
-              }}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', display: 'block', mt: 0.5 }}>
+          Production & Inventory
+        </Typography>
+      </Box>
+      <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+      <List sx={{ flexGrow: 1, px: 2, py: 2 }}>
+        {menuItems.map((item) => {
+          const isSelected = location.pathname === item.path;
+          return (
+            <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
+              <ListItemButton
+                selected={isSelected}
+                onClick={() => {
+                  navigate(item.path);
+                  setMobileOpen(false);
+                }}
+                sx={{
+                  borderRadius: 2,
+                  color: isSelected ? 'white' : 'rgba(255,255,255,0.7)',
+                  backgroundColor: isSelected ? alpha('#ffffff', 0.2) : 'transparent',
+                  transition: 'all 0.3s',
+                  '&:hover': {
+                    backgroundColor: alpha('#ffffff', 0.15),
+                    color: 'white',
+                    transform: 'translateX(4px)',
+                  },
+                  '&.Mui-selected': {
+                    backgroundColor: alpha('#ffffff', 0.2),
+                    '&:hover': {
+                      backgroundColor: alpha('#ffffff', 0.25),
+                    },
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ color: 'inherit', minWidth: 40 }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText 
+                  primary={item.text}
+                  primaryTypographyProps={{
+                    fontWeight: isSelected ? 600 : 500,
+                    fontSize: '0.95rem',
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
       </List>
-    </div>
+    </Box>
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <CssBaseline />
+      {/* AppBar */}
       <AppBar
         position="fixed"
+        elevation={0}
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
+          backgroundColor: theme.palette.background.paper,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          backdropFilter: 'blur(10px)',
         }}
       >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {menuItems.find((item) => item.path === location.pathname)?.text || 'Dashboard'}
-          </Typography>
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton
+              color="inherit"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ 
+                mr: 2, 
+                display: { sm: 'none' },
+                color: theme.palette.text.primary,
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography 
+              variant="h6" 
+              noWrap 
+              sx={{ 
+                color: theme.palette.text.primary,
+                fontWeight: 700,
+              }}
+            >
+              {menuItems.find((item) => item.path === location.pathname)?.text || 'Dashboard'}
+            </Typography>
+          </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="body2">{user?.name}</Typography>
+            {/* Dark Mode Toggle */}
+            <IconButton 
+              onClick={toggleTheme} 
+              sx={{ color: theme.palette.text.primary }}
+            >
+              {theme.palette.mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
+            </IconButton>
+            
+            {/* User Info */}
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
+                {user?.name}
+              </Typography>
+            </Box>
+            
+            {/* User Menu */}
             <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
-              <Avatar sx={{ bgcolor: 'secondary.main' }}>
+              <Avatar 
+                sx={{ 
+                  bgcolor: 'primary.main',
+                  width: 40,
+                  height: 40,
+                  fontWeight: 600,
+                }}
+              >
                 {user?.name?.charAt(0).toUpperCase()}
               </Avatar>
             </IconButton>
@@ -130,27 +226,46 @@ export default function Layout({ children }: LayoutProps) {
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
+            PaperProps={{
+              sx: {
+                mt: 1,
+                minWidth: 220,
+                borderRadius: 2,
+                boxShadow: theme.shadows[4],
+              },
+            }}
           >
-            <MenuItem disabled>
-              <Typography variant="body2">{user?.email}</Typography>
-            </MenuItem>
-            <MenuItem disabled>
-              <Typography variant="caption">Role: {user?.role}</Typography>
+            <Box sx={{ px: 2, py: 1.5 }}>
+              <Typography variant="body2" fontWeight={600}>
+                {user?.name}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {user?.email}
+              </Typography>
+            </Box>
+            <Divider />
+            <MenuItem disabled sx={{ py: 1 }}>
+              <Typography variant="caption">
+                Role: <strong>{user?.role}</strong>
+              </Typography>
             </MenuItem>
             <Divider />
-            <MenuItem onClick={handleLogout}>
+            <MenuItem onClick={handleLogout} sx={{ py: 1.5, color: 'error.main' }}>
               <ListItemIcon>
-                <Logout fontSize="small" />
+                <Logout fontSize="small" color="error" />
               </ListItemIcon>
               Logout
             </MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>
+
+      {/* Sidebar Navigation */}
       <Box
         component="nav"
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
       >
+        {/* Mobile Drawer */}
         <Drawer
           variant="temporary"
           open={mobileOpen}
@@ -163,11 +278,13 @@ export default function Layout({ children }: LayoutProps) {
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
               width: drawerWidth,
+              border: 'none',
             },
           }}
         >
           {drawer}
         </Drawer>
+        {/* Desktop Drawer */}
         <Drawer
           variant="permanent"
           sx={{
@@ -175,6 +292,7 @@ export default function Layout({ children }: LayoutProps) {
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
               width: drawerWidth,
+              border: 'none',
             },
           }}
           open
@@ -182,16 +300,22 @@ export default function Layout({ children }: LayoutProps) {
           {drawer}
         </Drawer>
       </Box>
+
+      {/* Main Content */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          p: { xs: 2, sm: 3 },
           width: { sm: `calc(100% - ${drawerWidth}px)` },
+          backgroundColor: theme.palette.background.default,
+          minHeight: '100vh',
         }}
       >
         <Toolbar />
-        {children}
+        <Box sx={{ mt: 3 }}>
+          {children}
+        </Box>
       </Box>
     </Box>
   );
