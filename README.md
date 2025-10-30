@@ -1,86 +1,56 @@
 # 📦 Production & Inventory Management System
 
-Sistema manajemen produksi dan inventori dengan kemampuan scanning barcode, tracking real-time, dan reporting untuk warehouse yang memproses **4000+ boxes per hari**.
+Modern production and inventory management system with barcode scanning, real-time tracking, and comprehensive reporting capabilities designed for warehouses processing **4000+ boxes per day**.
+
+## ✨ Features
+
+- 🎨 **Modern Material Dashboard UI** - Premium Material-UI design with custom theming
+- 📊 **Real-time Dashboard** - Live charts with actual transaction data
+- 📦 **Inventory Management** - Complete tracking with barcode scanning
+- 👥 **User Management** - Role-based access control (Admin, Manager, Operator)
+- 🔄 **Material & Product Tracking** - End-to-end supply chain visibility
+- 📈 **Analytics & Reports** - Export to Excel/PDF with comprehensive insights
+- ⚡ **Real-time Updates** - WebSocket-powered live data synchronization
 
 ## 🚀 Quick Start
 
-### Automatic Setup (Recommended)
+### Prerequisites
+- Node.js 20+
+- PostgreSQL 15+
+- Redis 7+
+
+### Development Setup
 
 ```bash
 # Clone repository
 git clone <your-repo-url>
 cd project_warehouse
 
-# Run automatic setup
-./quick-setup.sh
-
-# Start development
-npm run dev
-```
-
-**Login dengan:**
-- Email: `admin@warehouse.com`
-- Password: `admin123`
-
-**Akses:**
-- Frontend: http://localhost:5173
-- Backend: http://localhost:3000
-- API Docs: http://localhost:3000/api-docs
-
-### Manual Setup
-
-```bash
-# 1. Setup database
-sudo -u postgres psql
-CREATE DATABASE warehouse_db;
-CREATE USER warehouse_user WITH PASSWORD 'warehouse_pass';
-GRANT ALL PRIVILEGES ON DATABASE warehouse_db TO warehouse_user;
-\q
-
-# 2. Setup backend
+# Setup backend
 cd backend
 cp .env.example .env
 npm install
 npx prisma generate
 npx prisma migrate dev
-npx prisma db seed  # ← PENTING!
+npx prisma db seed
 
-# 3. Setup frontend
+# Setup frontend
 cd ../frontend
 cp .env.example .env
 npm install
 
-# 4. Start development
-cd ..
+# Start development servers
 npm run dev
 ```
 
-### 🔧 Login Gagal?
+**Default Login:**
+- Email: `admin@warehouse.com`
+- Password: `admin123`
 
-**Solusi tercepat:**
-```bash
-cd backend
-npx prisma db seed
-```
-
-📖 **Baca:** [LOGIN_FAILED_FIX.md](./LOGIN_FAILED_FIX.md) untuk troubleshooting lengkap.
-
----
-
-> **📖 Baca dokumentasi lengkap:**
-> - 🇮🇩 **[RINGKASAN LENGKAP (Bahasa Indonesia)](./docs/RINGKASAN_LENGKAP.md)** ← Baca ini dulu!
-> - 🏗️ [Architecture & Tech Stack](./docs/ARCHITECTURE.md)
-> - 📋 [Business Process](./docs/BUSINESS_PROCESS.md)
-> - 🚀 [Setup Guide](./docs/SETUP.md)
-
-## 🎯 Features
-
-- ✅ Barcode scanning untuk bahan baku dan produk jadi
-- ✅ Real-time inventory tracking
-- ✅ Dashboard untuk monitoring barang masuk/keluar
-- ✅ Re-weighing support untuk penyusutan
-- ✅ Export report ke Excel dan PDF
-- ✅ Scalable untuk 4000+ boxes per hari
+**Access Points:**
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:3000
+- API Docs: http://localhost:3000/api-docs
 
 ## 🛠 Tech Stack
 
@@ -233,41 +203,20 @@ npm run dev
 
 ## 🐳 Production Deployment
 
-### 🚀 Quick Deploy ke Server Linux
+See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for complete deployment guide including:
+- Docker deployment steps
+- Environment configuration
+- Database setup
+- SSL/TLS configuration
+- Troubleshooting common issues
 
+Quick deploy:
 ```bash
-# 1. Copy project ke server
-scp -r . user@server:/opt/warehouse
-
-# 2. SSH ke server
-ssh user@server
-cd /opt/warehouse
-
-# 3. Build Docker images
-cd backend && docker build -t warehouse-backend:latest .
-cd ../frontend && docker build -t warehouse-frontend:latest .
-cd ..
-
-# 4. Setup environment
-cp .env.prod.example .env.prod
-nano .env.prod  # Edit passwords & JWT_SECRET
-
-# 5. Deploy dengan Docker Compose
+# On server
+git clone <your-repo-url>
+cd project_warehouse
 docker compose -f docker-compose.prod.yml up -d
-
-# 6. Setup database
-docker compose exec backend npm run db:migrate
-docker compose exec backend npm run db:seed
-
-# ✅ Aplikasi running di http://server-ip
 ```
-
-### 📚 Dokumentasi Deployment Lengkap
-
-- **[DEPLOY.md](./DEPLOY.md)** - Quick deployment guide
-- **[CHECKLIST.md](./CHECKLIST.md)** - Production deployment checklist
-- **[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)** - Comprehensive deployment guide
-- **[docs/SETUP.md](./docs/SETUP.md)** - Setup & configuration guide
 
 ## 📈 Scalability Considerations
 
@@ -317,40 +266,11 @@ npm test
 
 ## 📚 Documentation
 
-| Dokumen | Deskripsi | Status |
-|---------|-----------|--------|
-| 🇮🇩 **[RINGKASAN LENGKAP](./docs/RINGKASAN_LENGKAP.md)** | **Penjelasan lengkap dalam Bahasa Indonesia** | ✅ |
-| 📁 [Project Structure](./docs/PROJECT_STRUCTURE.md) | Struktur folder & file organization | ✅ |
-| ⚡ [Quick Reference](./docs/QUICK_REFERENCE.md) | Referensi cepat untuk developer | ✅ |
-| 🏗️ [Architecture](./docs/ARCHITECTURE.md) | Tech stack & design decisions | ✅ |
-| 📋 [Business Process](./docs/BUSINESS_PROCESS.md) | Proses bisnis detail | ✅ |
-| 🚀 [Setup Guide](./docs/SETUP.md) | Panduan instalasi & deployment lengkap | ✅ |
-| 📖 [Summary](./docs/SUMMARY.md) | Project summary (English) | ✅ |
-
-## 🎯 Production Checklist
-
-- [ ] Change default passwords
-- [ ] Generate strong JWT_SECRET
-- [ ] Setup SSL/TLS certificates
-- [ ] Configure firewall
-- [ ] Setup database backups
-- [ ] Configure log rotation
-- [ ] Enable rate limiting
-- [ ] Setup monitoring
-- [ ] Configure CORS properly
-- [ ] Use environment variables (never hardcode secrets)
-
-## 📝 License
-
-MIT License - feel free to use this project for your needs.
+- 📖 **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Complete deployment guide with troubleshooting
 
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📧 Support
-
-For questions and support, please create an issue in the repository.
 
 ---
 
